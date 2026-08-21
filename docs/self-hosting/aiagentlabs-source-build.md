@@ -29,6 +29,10 @@ the deployment must not pull a prebuilt Cal.diy application image.
 - The web container exposes port 3000 only to Coolify's proxy.
 - Runtime secrets live only in Coolify environment variables.
 - Build-time database credentials are deliberately non-secret and never reach PostgreSQL.
+- Runtime database/auth/cron/setup secrets use empty Compose interpolation
+  defaults so Coolify can parse its build-only environment. The `web` and
+  `cron` commands fail closed before startup if any required secret is absent;
+  `DATABASE_URL` is assembled only inside the runtime container.
 - Public signup is disabled until SMTP delivery is configured and verified.
 - First-admin creation requires the exact `X-Setup-Secret` header matching the
   `SETUP_SECRET` stored in Coolify. The public setup form cannot win a bootstrap race.

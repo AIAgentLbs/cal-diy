@@ -25,11 +25,10 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_WEBAPP_URL: ${NEXT_PUBLIC_WEBAPP_URL:?Set NEXT_PUBLIC_WEBAPP_URL}
       NEXTAUTH_URL: ${NEXT_PUBLIC_WEBAPP_URL:?Set NEXT_PUBLIC_WEBAPP_URL}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET}
-      CALENDSO_ENCRYPTION_KEY: ${CALENDSO_ENCRYPTION_KEY:?Set CALENDSO_ENCRYPTION_KEY}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-}
+      CALENDSO_ENCRYPTION_KEY: ${CALENDSO_ENCRYPTION_KEY:-}
       DATABASE_HOST: postgres:5432
-      DATABASE_URL: postgresql://cal:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/cal
-      DATABASE_DIRECT_URL: postgresql://cal:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/cal
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       ALLOWED_HOSTNAMES: ${ALLOWED_HOSTNAMES:?Set ALLOWED_HOSTNAMES}
       CALCOM_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_LICENSE_CONSENT: ${NEXT_PUBLIC_LICENSE_CONSENT:-agree}
@@ -47,10 +46,23 @@ services:
       EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT:-587}
       EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
       EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
-      CRON_API_KEY: ${CRON_API_KEY:?Set CRON_API_KEY}
-      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET}
-      SETUP_SECRET: ${SETUP_SECRET:?Set SETUP_SECRET}
+      CRON_API_KEY: ${CRON_API_KEY:-}
+      CRON_SECRET: ${CRON_SECRET:-}
+      SETUP_SECRET: ${SETUP_SECRET:-}
       TASKER_ENABLE_WEBHOOKS: "1"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        : "$${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}"
+        : "$${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET}"
+        : "$${CALENDSO_ENCRYPTION_KEY:?Set CALENDSO_ENCRYPTION_KEY}"
+        : "$${CRON_API_KEY:?Set CRON_API_KEY}"
+        : "$${CRON_SECRET:?Set CRON_SECRET}"
+        : "$${SETUP_SECRET:?Set SETUP_SECRET}"
+        export DATABASE_URL="postgresql://cal:$${POSTGRES_PASSWORD}@postgres:5432/cal"
+        export DATABASE_DIRECT_URL="$${DATABASE_URL}"
+        exec /calcom/scripts/start.sh
     expose:
       - "3000"
     depends_on:
@@ -67,12 +79,14 @@ services:
   cron:
     image: aiagentlabs-cal-diy-source:local
     environment:
-      CRON_API_KEY: ${CRON_API_KEY:?Set CRON_API_KEY}
-      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET}
+      CRON_API_KEY: ${CRON_API_KEY:-}
+      CRON_SECRET: ${CRON_SECRET:-}
     command:
       - /bin/sh
       - -ec
       - |
+        : "$${CRON_API_KEY:?Set CRON_API_KEY}"
+        : "$${CRON_SECRET:?Set CRON_SECRET}"
         while true; do
           wget -qO- --header="Authorization: Bearer $${CRON_SECRET}" --post-data="" http://web:3000/api/tasks/cron
           wget -qO- --header="Authorization: $${CRON_API_KEY}" --post-data="" http://web:3000/api/cron/webhookTriggers
@@ -88,7 +102,7 @@ services:
     environment:
       POSTGRES_DB: cal
       POSTGRES_USER: cal
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
     volumes:
       - cal-postgres-data:/var/lib/postgresql/data
     healthcheck:
