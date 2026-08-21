@@ -34,7 +34,7 @@ the deployment must not pull a prebuilt Cal.diy application image.
   `cron` commands fail closed before startup if any required secret is absent;
   `DATABASE_URL` is assembled only inside the runtime container.
 - Public signup is disabled until SMTP delivery is configured and verified.
-- First-admin creation requires the exact `X-Setup-Secret` header matching the
+- First-admin creation requires `Authorization: Bearer <SETUP_SECRET>` matching the
   `SETUP_SECRET` stored in Coolify. The public setup form cannot win a bootstrap race.
 
 ## Exact Coolify routing values
@@ -85,7 +85,7 @@ Corresponding Source as `Исходный код / Source code`.
 
 Create the first administrator once, before announcing the domain, by posting
 the setup form fields to `/api/auth/setup` with `Content-Type: application/json`
-and the generated `X-Setup-Secret` header. A second request is rejected because
+and the generated Bearer authorization header. A second request is rejected because
 the database is no longer empty. Remove the setup secret from operator handoff
 records after login has been verified.
 

@@ -88,7 +88,7 @@ services:
         : "$${CRON_API_KEY:?Set CRON_API_KEY}"
         : "$${CRON_SECRET:?Set CRON_SECRET}"
         while true; do
-          wget -qO- --header="Authorization: Bearer $${CRON_SECRET}" --post-data="" http://web:3000/api/tasks/cron
+          wget -qO- --header="Authorization: Bearer $${CRON_SECRET}" http://web:3000/api/tasks/cron
           wget -qO- --header="Authorization: $${CRON_API_KEY}" --post-data="" http://web:3000/api/cron/webhookTriggers
           sleep 60
         done

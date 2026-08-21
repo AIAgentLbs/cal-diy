@@ -10,7 +10,7 @@ import { parseRequestData } from "app/api/parseRequestData";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import z from "zod";
-import { isSetupRequestAuthorized } from "./setup-auth";
+import { getBearerSecret, isSetupRequestAuthorized } from "./setup-auth";
 
 const querySchema = z.object({
   username: z
@@ -25,7 +25,8 @@ const querySchema = z.object({
 });
 
 async function handler(req: NextRequest) {
-  if (!isSetupRequestAuthorized(req.headers.get("x-setup-secret"), process.env.SETUP_SECRET)) {
+  const providedSecret = getBearerSecret(req.headers.get("authorization"));
+  if (!isSetupRequestAuthorized(providedSecret, process.env.SETUP_SECRET)) {
     throw new HttpError({ statusCode: 401, message: "First-admin setup is not authorized." });
   }
 
