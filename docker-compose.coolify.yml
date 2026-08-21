@@ -78,6 +78,8 @@ services:
 
   cron:
     image: aiagentlabs-cal-diy-source:local
+    healthcheck:
+      disable: true
     environment:
       CRON_API_KEY: ${CRON_API_KEY:-}
       CRON_SECRET: ${CRON_SECRET:-}
