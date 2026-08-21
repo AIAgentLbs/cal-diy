@@ -8,4 +8,7 @@ scripts/replace-placeholder.sh "$BUILT_NEXT_PUBLIC_WEBAPP_URL" "$NEXT_PUBLIC_WEB
 scripts/wait-for-it.sh ${DATABASE_HOST} -- echo "database is up"
 npx prisma migrate deploy --schema /calcom/packages/prisma/schema.prisma
 npx ts-node --transpile-only /calcom/scripts/seed-app-store.ts
-yarn start
+# The root `yarn start` invokes Turborepo in strict env mode, which strips
+# runtime-only secrets that are intentionally absent during the image build.
+# Pass the container's runtime environment through to the Next.js process.
+yarn turbo run start --filter="@calcom/web" --env-mode=loose
