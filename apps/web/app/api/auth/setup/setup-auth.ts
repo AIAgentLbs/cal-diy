@@ -12,6 +12,12 @@ export function getSetupSecretFromBody(body: unknown): string | null {
   return typeof setupSecret === "string" ? setupSecret : null;
 }
 
+export function getSetupSecretFromEnvironment(
+  environment: Record<string, string | undefined>
+): string | undefined {
+  return environment.SETUP_SECRET;
+}
+
 export function isSetupRequestAuthorized(providedSecret: string | null, serverSecret?: string): boolean {
   if (!providedSecret || !serverSecret) return false;
 

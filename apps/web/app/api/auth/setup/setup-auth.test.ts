@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getBearerSecret, getSetupSecretFromBody, isSetupRequestAuthorized } from "./setup-auth";
+import {
+  getBearerSecret,
+  getSetupSecretFromBody,
+  getSetupSecretFromEnvironment,
+  isSetupRequestAuthorized,
+} from "./setup-auth";
 
 describe("first-admin setup authorization", () => {
   it("requires an exact non-empty setup secret", () => {
@@ -25,5 +30,10 @@ describe("first-admin setup authorization", () => {
     expect(getSetupSecretFromBody({ setup_secret: 123 })).toBeNull();
     expect(getSetupSecretFromBody({})).toBeNull();
     expect(getSetupSecretFromBody(null)).toBeNull();
+  });
+
+  it("reads the setup secret from the runtime environment object", () => {
+    expect(getSetupSecretFromEnvironment({ SETUP_SECRET: "runtime-secret" })).toBe("runtime-secret");
+    expect(getSetupSecretFromEnvironment({})).toBeUndefined();
   });
 });
