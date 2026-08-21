@@ -1,10 +1,10 @@
 # cal.aiagentlbs.com source-build deployment
 
-Status: implementation reviewed; production rollout in progress
+Status: deployed and infrastructure-verified on 2026-08-21; SMTP and owner onboarding remain pending
 
 ## Goal
 
-Run the pinned Cal.diy source at `https://cal.aiagentlbs.com` from the private
+Run the pinned Cal.diy source at `https://cal.aiagentlbs.com` from the public
 `AIAgentLbs/cal-diy` repository. Coolify must compile the checked-out source;
 the deployment must not pull a prebuilt Cal.diy application image.
 
@@ -34,8 +34,10 @@ the deployment must not pull a prebuilt Cal.diy application image.
   `cron` commands fail closed before startup if any required secret is absent;
   `DATABASE_URL` is assembled only inside the runtime container.
 - Public signup is disabled until SMTP delivery is configured and verified.
-- First-admin creation requires `Authorization: Bearer <SETUP_SECRET>` matching the
-  `SETUP_SECRET` stored in Coolify. The public setup form cannot win a bootstrap race.
+- First-admin creation requires `Authorization: Bearer <SETUP_SECRET>` or the same
+  secret as the JSON `setup_secret` field, matching the value stored in Coolify.
+  The public setup form cannot win a bootstrap race. Turborepo starts in loose
+  runtime-env mode so secrets intentionally absent from the image build reach Next.js.
 
 ## Exact Coolify routing values
 
@@ -85,22 +87,53 @@ Corresponding Source as `Исходный код / Source code`.
 
 Create the first administrator once, before announcing the domain, by posting
 the setup form fields to `/api/auth/setup` with `Content-Type: application/json`
-and the generated Bearer authorization header. A second request is rejected because
-the database is no longer empty. Remove the setup secret from operator handoff
-records after login has been verified.
+and either the generated Bearer authorization header or JSON `setup_secret` field.
+A second request is rejected because the database is no longer empty. Do not copy
+the setup secret into operator handoff records after login has been verified.
+
+## Production evidence (2026-08-21)
+
+- Domain: `https://cal.aiagentlbs.com`; DNS resolves to `5.78.46.146`; TLS verification succeeds.
+- Coolify application: `p4f9qrrdzm2aaiiulhtkm5vd`.
+- Deployed application commit: `3552475987ff6a12fcb9822a4e532a867120b508`.
+- Locally compiled application image: `sha256:564c5e084559bd5c64dadcde7290741b9ecd53e946fa886bf8370c45d8049adf`.
+- The GitHub-triggered deployment finished successfully and all three services run:
+  PostgreSQL and web are healthy; cron runs with its inapplicable inherited web
+  healthcheck disabled.
+- Startup found 588 Prisma migrations and reported no pending migrations.
+- First admin `mihailorama@gmail.com` exists; a repeat bootstrap returns
+  `400 No setup needed`; credentials login succeeds. The password is stored in
+  the operator's macOS Keychain, not in Git or this document.
+- Account locale is `ru`; the Russian login UI, custom application title, logo,
+  DNS, and TLS were checked over the public domain.
+- `/api/tasks/cron` and `/api/cron/webhookTriggers` both return HTTP 200 with
+  their separate runtime credentials. The cron PID remains up across multiple cycles.
+- Public signup stays disabled. Admin 2FA/onboarding, the first real event type,
+  external calendar accounts, SMTP delivery, and the production CRM webhook target
+  require owner-specific inputs and are intentionally not claimed complete.
+- A full source build can temporarily consume 20-25 GB. The server's existing
+  hourly disk guard and weekly cache task were repaired to use the supported
+  `docker builder prune -f`; final free space was 32 GB (79% used). No Docker
+  volumes or application databases were removed.
 
 ## Deployment milestones
 
 - [x] Pin upstream release and commit.
-- [x] Create the private source repository and preserve the upstream remote.
+- [x] Create the public source repository and preserve the upstream remote.
 - [x] Add a Coolify compose file that builds from local source.
 - [x] Run targeted regression tests and Compose configuration validation.
 - [x] Complete independent architecture/security review and resolve its code findings.
-- [ ] Complete the full Node 20 container build in Coolify (the workstation runs unsupported Node 26 and has no Docker daemon).
-- [ ] Create DNS, Coolify project/application, and runtime secrets.
-- [ ] Verify migrations, exact deployed commit, HTTPS, Russian UI, signup/login,
-  booking-page rendering, persistence after redeploy, and webhook configuration UI.
-- [ ] Verify GitHub webhook autodeploy from a harmless follow-up commit.
+- [x] Complete the full Node 20 source build in Coolify.
+- [x] Create DNS, Coolify project/application, persistent PostgreSQL, and runtime secrets.
+- [x] Verify migrations, exact deployed commit, HTTPS, Russian UI/account locale,
+  protected bootstrap, credentials login, cron endpoints, and persistence across redeploys.
+- [x] Verify GitHub webhook autodeploy from follow-up commits.
+- [ ] Complete owner onboarding and admin 2FA, then create the first real event type
+  and verify its public booking page and Corresponding Source link.
+- [ ] Configure SMTP and verify invite, password reset, booking, cancellation,
+  and recipient-inbox delivery while keeping public signup disabled until green.
+- [ ] Configure the production CRM webhook URL/signing secret and verify a real
+  booking event, retry behavior, and CRM-side receipt.
 
 ## Update procedure
 
