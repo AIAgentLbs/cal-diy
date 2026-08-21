@@ -1,7 +1,6 @@
 import dayjs from "@calcom/dayjs";
 import logger from "@calcom/lib/logger";
 import type { PrismaClient } from "@calcom/prisma";
-
 import { DEFAULT_WEBHOOK_VERSION } from "./interface/IWebhookRepository";
 import { createWebhookSignature, jsonParse } from "./sendPayload";
 
@@ -34,7 +33,7 @@ export async function handleWebhookScheduledTriggers(prisma: PrismaClient) {
     },
   });
 
-  const fetchPromises: Promise<Response | void>[] = [];
+  const fetchPromises: Promise<void>[] = [];
 
   // run jobs
   for (const job of jobsToRun) {
@@ -70,18 +69,25 @@ export async function handleWebhookScheduledTriggers(prisma: PrismaClient) {
         headers,
         // Avoid following redirect
         redirect: "manual",
-      }).catch((error) => {
-        console.error(`Webhook trigger for subscriber url ${job.subscriberUrl} failed with error: ${error}`);
+        signal: AbortSignal.timeout(10_000),
       })
-    );
+        .then(async (response) => {
+          if (!response.ok) {
+            console.error("Scheduled webhook trigger delivery failed", { status: response.status });
+            return;
+          }
 
-    // clean finished job
-    await prisma.webhookScheduledTriggers.delete({
-      where: {
-        id: job.id,
-      },
-    });
+          await prisma.webhookScheduledTriggers.delete({
+            where: {
+              id: job.id,
+            },
+          });
+        })
+        .catch(() => {
+          console.error("Scheduled webhook trigger delivery failed");
+        })
+    );
   }
 
-  Promise.allSettled(fetchPromises);
+  await Promise.allSettled(fetchPromises);
 }

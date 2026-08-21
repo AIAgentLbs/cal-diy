@@ -1,7 +1,4 @@
 import { randomBytes } from "node:crypto";
-import short from "short-uuid";
-import { v5 as uuidv5 } from "uuid";
-
 import dayjs from "@calcom/dayjs";
 import type {
   CreateInstantBookingData,
@@ -17,17 +14,18 @@ import { createInstantMeetingWithCalVideo } from "@calcom/features/conferencing/
 import { getFullName } from "@calcom/features/form-builder/utils";
 import { sendNotification } from "@calcom/features/notifications/sendNotification";
 import { sendGenericWebhookPayload } from "@calcom/features/webhooks/lib/sendPayload";
+import { getTranslation } from "@calcom/i18n/server";
 import { WEBAPP_URL } from "@calcom/lib/constants";
 import getOrgIdFromMemberOrTeamId from "@calcom/lib/getOrgIdFromMemberOrTeamId";
 import { isPrismaObjOrUndefined } from "@calcom/lib/isPrismaObj";
 import logger from "@calcom/lib/logger";
-import { getTranslation } from "@calcom/i18n/server";
 import type { PrismaClient } from "@calcom/prisma";
 import { Prisma } from "@calcom/prisma/client";
 import { BookingStatus, WebhookTriggerEvents } from "@calcom/prisma/enums";
-
-import { instantMeetingSubscriptionSchema as subscriptionSchema } from "../dto/schema";
+import short from "short-uuid";
+import { v5 as uuidv5 } from "uuid";
 import { WebhookVersion } from "../../../webhooks/lib/interface/IWebhookRepository";
+import { instantMeetingSubscriptionSchema as subscriptionSchema } from "../dto/schema";
 
 interface IInstantBookingCreateServiceDependencies {
   prismaClient: PrismaClient;
@@ -87,19 +85,15 @@ const handleInstantMeetingWebhookTrigger = async (args: {
           version: sub.version as WebhookVersion,
         },
         data: webhookData,
-      }).catch((e) => {
-        console.error(
-          `Error executing webhook for event: ${eventTrigger}, URL: ${sub.subscriberUrl}`,
-          sub,
-          e
-        );
+      }).catch(() => {
+        console.error(`Error executing webhook for event: ${eventTrigger}`, { webhookId: sub.id });
       });
     });
 
     await Promise.all(promises);
-  } catch (error) {
-    console.error("Error executing webhook", error);
-    logger.error("Error while sending webhook", error);
+  } catch {
+    console.error("Error executing webhook");
+    logger.error("Error while sending webhook");
   }
 };
 

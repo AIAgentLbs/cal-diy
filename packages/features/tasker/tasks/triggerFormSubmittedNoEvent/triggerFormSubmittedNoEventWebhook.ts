@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import type { FORM_SUBMITTED_WEBHOOK_RESPONSES } from "@calcom/app-store/routing-forms/lib/formSubmissionUtils";
 import incompleteBookingActionFunctions from "@calcom/app-store/routing-forms/lib/incompleteBooking/actionFunctions";
 import {
@@ -8,7 +6,7 @@ import {
 } from "@calcom/features/webhooks/lib/interface/IWebhookRepository";
 import { sendGenericWebhookPayload } from "@calcom/features/webhooks/lib/sendPayload";
 import prisma from "@calcom/prisma";
-
+import { z } from "zod";
 import { getSubmitterEmail, shouldTriggerFormSubmittedNoEvent } from "./formSubmissionValidation";
 
 export type ResponseData = {
@@ -74,8 +72,8 @@ export async function triggerFormSubmittedNoEventWebhook(payload: string): Promi
       responseId,
       responses: responses as FORM_SUBMITTED_WEBHOOK_RESPONSES,
     },
-  }).catch((e) => {
-    console.error(`Error executing FORM_SUBMITTED_NO_EVENT webhook`, webhook, e);
+  }).catch(() => {
+    console.error("Error executing FORM_SUBMITTED_NO_EVENT webhook");
   });
 
   // See if there are other incomplete booking actions

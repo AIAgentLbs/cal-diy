@@ -2,9 +2,9 @@ import dayjs from "@calcom/dayjs";
 import type { NoShowUpdatedAuditData } from "@calcom/features/booking-audit/lib/actions/NoShowUpdatedAuditActionService";
 import { makeSystemActor } from "@calcom/features/booking-audit/lib/makeActor";
 import { getBookingEventHandlerService } from "@calcom/features/bookings/di/BookingEventHandlerService.container";
-import { getFeaturesRepository } from "@calcom/features/di/containers/FeaturesRepository";
 import type { Host } from "@calcom/features/bookings/lib/getHostsAndGuests";
 import { getHostsAndGuests } from "@calcom/features/bookings/lib/getHostsAndGuests";
+import { getFeaturesRepository } from "@calcom/features/di/containers/FeaturesRepository";
 import { sendGenericWebhookPayload } from "@calcom/features/webhooks/lib/sendPayload";
 import getOrgIdFromMemberOrTeamId from "@calcom/lib/getOrgIdFromMemberOrTeamId";
 import logger from "@calcom/lib/logger";
@@ -81,12 +81,8 @@ export function sendWebhookPayload(
           ? `Guest didn't join the call or didn't join before ${maxStartTimeHumanReadable}`
           : `Host with email ${hostEmail} didn't join the call or didn't join before ${maxStartTimeHumanReadable}`,
     },
-  }).catch((e) => {
-    console.error(
-      `Error executing webhook for event: ${triggerEvent}, URL: ${webhook.subscriberUrl}`,
-      webhook,
-      e
-    );
+  }).catch(() => {
+    console.error(`Error executing no-show webhook for event: ${triggerEvent}`);
   });
 }
 

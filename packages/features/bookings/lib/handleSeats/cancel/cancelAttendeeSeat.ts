@@ -9,11 +9,10 @@ import { WorkflowRepository } from "@calcom/features/ee/workflows/repositories/W
 import type { WebhookVersion } from "@calcom/features/webhooks/lib/interface/IWebhookRepository";
 import sendPayload from "@calcom/features/webhooks/lib/sendOrSchedulePayload";
 import type { EventPayloadType, EventTypeInfo } from "@calcom/features/webhooks/lib/sendPayload";
+import { getTranslation } from "@calcom/i18n/server";
 import { getRichDescription } from "@calcom/lib/CalEventParser";
 import { HttpError } from "@calcom/lib/http-error";
 import logger from "@calcom/lib/logger";
-import { safeStringify } from "@calcom/lib/safeStringify";
-import { getTranslation } from "@calcom/i18n/server";
 import prisma from "@calcom/prisma";
 import { WebhookTriggerEvents } from "@calcom/prisma/enums";
 import type { EventTypeMetadata } from "@calcom/prisma/zod-utils";
@@ -176,11 +175,12 @@ async function cancelAttendeeSeat(
       new Date().toISOString(),
       webhook,
       payload
-    ).catch((e) => {
-      logger.error(
-        `Error executing webhook for event: ${WebhookTriggerEvents.BOOKING_CANCELLED}, URL: ${webhook.subscriberUrl}, bookingId: ${evt.bookingId}, bookingUid: ${evt.uid}`,
-        safeStringify(e)
-      );
+    ).catch(() => {
+      logger.error(`Error executing webhook for event: ${WebhookTriggerEvents.BOOKING_CANCELLED}`, {
+        webhookId: webhook.id,
+        bookingId: evt.bookingId,
+        bookingUid: evt.uid,
+      });
     })
   );
   await Promise.all(promises);

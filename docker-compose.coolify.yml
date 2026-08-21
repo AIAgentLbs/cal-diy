@@ -1,0 +1,102 @@
+services:
+  web:
+    image: aiagentlabs-cal-diy-source:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_WEBAPP_URL: ${NEXT_PUBLIC_WEBAPP_URL:?Set NEXT_PUBLIC_WEBAPP_URL}
+        NEXT_PUBLIC_API_V2_URL: ${NEXT_PUBLIC_API_V2_URL:-}
+        NEXT_PUBLIC_LICENSE_CONSENT: ${NEXT_PUBLIC_LICENSE_CONSENT:-agree}
+        NEXT_PUBLIC_WEBSITE_TERMS_URL: ${NEXT_PUBLIC_WEBSITE_TERMS_URL:-https://aiagentlbs.com}
+        NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL: ${NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL:-https://aiagentlbs.com}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-AI Agent Labs Calendar}
+        NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS: ${NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS:-info@aiagentlbs.com}
+        NEXT_PUBLIC_COMPANY_NAME: ${NEXT_PUBLIC_COMPANY_NAME:-AI Agent Labs}
+        NEXT_PUBLIC_DISABLE_SIGNUP: ${NEXT_PUBLIC_DISABLE_SIGNUP:-true}
+        NEXT_PUBLIC_POWERED_BY_URL: ${NEXT_PUBLIC_POWERED_BY_URL:-https://github.com/AIAgentLbs/cal-diy}
+        NEXT_PUBLIC_SOURCE_CODE_URL: ${NEXT_PUBLIC_SOURCE_CODE_URL:-https://github.com/AIAgentLbs/cal-diy}
+        NEXT_PUBLIC_SINGLE_ORG_SLUG: ""
+        ORGANIZATIONS_ENABLED: "false"
+        CALCOM_TELEMETRY_DISABLED: "1"
+        DATABASE_URL: postgresql://cal:build-only@postgres:5432/cal
+        CSP_POLICY: ${CSP_POLICY:-}
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_WEBAPP_URL: ${NEXT_PUBLIC_WEBAPP_URL:?Set NEXT_PUBLIC_WEBAPP_URL}
+      NEXTAUTH_URL: ${NEXT_PUBLIC_WEBAPP_URL:?Set NEXT_PUBLIC_WEBAPP_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET}
+      CALENDSO_ENCRYPTION_KEY: ${CALENDSO_ENCRYPTION_KEY:?Set CALENDSO_ENCRYPTION_KEY}
+      DATABASE_HOST: postgres:5432
+      DATABASE_URL: postgresql://cal:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/cal
+      DATABASE_DIRECT_URL: postgresql://cal:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/cal
+      ALLOWED_HOSTNAMES: ${ALLOWED_HOSTNAMES:?Set ALLOWED_HOSTNAMES}
+      CALCOM_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_LICENSE_CONSENT: ${NEXT_PUBLIC_LICENSE_CONSENT:-agree}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-AI Agent Labs Calendar}
+      NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS: ${NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS:-info@aiagentlbs.com}
+      NEXT_PUBLIC_COMPANY_NAME: ${NEXT_PUBLIC_COMPANY_NAME:-AI Agent Labs}
+      NEXT_PUBLIC_WEBSITE_TERMS_URL: ${NEXT_PUBLIC_WEBSITE_TERMS_URL:-https://aiagentlbs.com}
+      NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL: ${NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL:-https://aiagentlbs.com}
+      NEXT_PUBLIC_DISABLE_SIGNUP: ${NEXT_PUBLIC_DISABLE_SIGNUP:-true}
+      NEXT_PUBLIC_POWERED_BY_URL: ${NEXT_PUBLIC_POWERED_BY_URL:-https://github.com/AIAgentLbs/cal-diy}
+      NEXT_PUBLIC_SOURCE_CODE_URL: ${NEXT_PUBLIC_SOURCE_CODE_URL:-https://github.com/AIAgentLbs/cal-diy}
+      EMAIL_FROM: ${EMAIL_FROM:-calendar@aiagentlbs.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-AI Agent Labs Calendar}
+      EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST:-}
+      EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT:-587}
+      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
+      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
+      CRON_API_KEY: ${CRON_API_KEY:?Set CRON_API_KEY}
+      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET}
+      SETUP_SECRET: ${SETUP_SECRET:?Set SETUP_SECRET}
+      TASKER_ENABLE_WEBHOOKS: "1"
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://127.0.0.1:3000/auth/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 180s
+    restart: unless-stopped
+
+  cron:
+    image: aiagentlabs-cal-diy-source:local
+    environment:
+      CRON_API_KEY: ${CRON_API_KEY:?Set CRON_API_KEY}
+      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET}
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        while true; do
+          wget -qO- --header="Authorization: Bearer $${CRON_SECRET}" --post-data="" http://web:3000/api/tasks/cron
+          wget -qO- --header="Authorization: $${CRON_API_KEY}" --post-data="" http://web:3000/api/cron/webhookTriggers
+          sleep 60
+        done
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: cal
+      POSTGRES_USER: cal
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - cal-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cal -d cal"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  cal-postgres-data:

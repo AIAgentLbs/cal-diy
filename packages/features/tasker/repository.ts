@@ -1,7 +1,6 @@
-import { prisma } from "@calcom/prisma";
 import type { PrismaClient } from "@calcom/prisma";
+import { prisma } from "@calcom/prisma";
 import { Prisma } from "@calcom/prisma/client";
-
 import { type TaskTypes } from "./tasker";
 import { scanWorkflowBodySchema } from "./tasks/scanWorkflowBody";
 
@@ -50,7 +49,7 @@ export class TaskRepository {
     options: { scheduledAt?: Date; maxAttempts?: number; referenceUid?: string } = {}
   ) {
     const { scheduledAt, maxAttempts, referenceUid } = options;
-    console.info("Creating task", { type, payload, scheduledAt, maxAttempts });
+    console.info("Creating task", { type, scheduledAt, maxAttempts });
     const newTask = await this.deps.prismaClient.task.create({
       data: {
         payload,

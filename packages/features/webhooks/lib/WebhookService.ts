@@ -1,9 +1,7 @@
 import logger from "@calcom/lib/logger";
-import { safeStringify } from "@calcom/lib/safeStringify";
-
 import type { WebhookSubscriber } from "./dto/types";
-import getWebhooks from "./getWebhooks";
 import type { GetSubscriberOptions } from "./getWebhooks";
+import getWebhooks from "./getWebhooks";
 import sendOrSchedulePayload from "./sendOrSchedulePayload";
 
 const log = logger.getSubLogger({ prefix: ["[WebhookService] "] });
@@ -29,11 +27,8 @@ export class WebhookService {
         new Date().toISOString(),
         sub,
         payload
-      ).catch((e) => {
-        log.error(
-          `Error executing webhook for event: ${this.options.triggerEvent}, URL: ${sub.subscriberUrl}`,
-          safeStringify(e)
-        );
+      ).catch(() => {
+        log.error(`Error executing webhook for event: ${this.options.triggerEvent}`);
       })
     );
     await Promise.allSettled(promises);

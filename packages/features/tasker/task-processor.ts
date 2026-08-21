@@ -9,12 +9,11 @@ import tasksMap, { tasksConfig } from "./tasks";
 export class TaskProcessor {
   async processQueue(): Promise<void> {
     const tasks = await Task.getNextBatch();
-    console.info(`Processing ${tasks.length} tasks`, tasks);
+    console.info(`Processing ${tasks.length} tasks`);
 
     const tasksPromises = tasks.map(async (task) => {
       console.info(
-        `Processing task ${task.id}, attempt:${task.attempts} maxAttempts:${task.maxAttempts} lastFailedAttempt:${task.lastFailedAttemptAt}`,
-        task
+        `Processing task ${task.id}, type:${task.type}, attempt:${task.attempts} maxAttempts:${task.maxAttempts} lastFailedAttempt:${task.lastFailedAttemptAt}`
       );
       const taskHandlerGetter = tasksMap[task.type as keyof typeof tasksMap];
       if (!taskHandlerGetter) throw new Error(`Task handler not found for type ${task.type}`);
@@ -37,6 +36,6 @@ export class TaskProcessor {
     const settled = await Promise.allSettled(tasksPromises);
     const failed = settled.filter((result) => result.status === "rejected");
     const succeded = settled.filter((result) => result.status === "fulfilled");
-    console.info({ failed, succeded });
+    console.info({ failed: failed.length, succeeded: succeded.length });
   }
 }

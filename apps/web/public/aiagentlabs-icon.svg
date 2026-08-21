@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">AI Agent Labs</title>
+  <rect width="64" height="64" rx="16" fill="#111827"/>
+  <path d="M12 48 25 15h9l13 33h-9l-2.5-7H23.4L21 48h-9Zm14-15h6.8l-3.4-10-3.4 10ZM48 15h7v33h-7V15Z" fill="#fff"/>
+</svg>

@@ -1,7 +1,6 @@
-import { z } from "zod";
-
 import { WebhookVersion } from "@calcom/features/webhooks/lib/interface/IWebhookRepository";
 import sendPayload from "@calcom/features/webhooks/lib/sendPayload";
+import { z } from "zod";
 
 const sendWebhookPayloadSchema = z.object({
   secretKey: z.string().nullable(),
@@ -22,9 +21,12 @@ export async function sendWebhook(payload: string): Promise<void> {
     const { secretKey, triggerEvent, createdAt, webhook, data } = sendWebhookPayloadSchema.parse(
       JSON.parse(payload)
     );
-    await sendPayload(secretKey, triggerEvent, createdAt, webhook, data);
+    const result = await sendPayload(secretKey, triggerEvent, createdAt, webhook, data);
+    if (!result.ok) {
+      throw new Error(`Webhook delivery failed with HTTP ${result.status}`);
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Webhook task delivery failed");
     throw error;
   }
 }

@@ -20,6 +20,36 @@ describe("sendPayload", () => {
   });
 
   describe("X-Cal-Webhook-Version header", () => {
+    it("adds a finite timeout signal to webhook delivery", async () => {
+      const timeoutSignal = new AbortController().signal;
+      const timeout = vi.spyOn(AbortSignal, "timeout").mockReturnValue(timeoutSignal);
+      const webhook = {
+        subscriberUrl: "https://example.com/webhook",
+        appId: null,
+        payloadTemplate: null,
+        version: WebhookVersion.V_2021_10_20,
+      };
+
+      await sendPayload("test-secret", "BOOKING_CREATED", new Date().toISOString(), webhook, {
+        title: "Test Booking",
+        startTime: "2024-01-01T10:00:00Z",
+        endTime: "2024-01-01T11:00:00Z",
+        organizer: {
+          email: "organizer@example.com",
+          name: "Organizer",
+          timeZone: "UTC",
+          language: { locale: "en" },
+        },
+        attendees: [],
+        type: "test-event",
+        description: "",
+      } as unknown as Parameters<typeof sendPayload>[4]);
+
+      const [, options] = mockFetch.mock.calls[0];
+      expect(timeout).toHaveBeenCalledWith(10_000);
+      expect(options.signal).toBe(timeoutSignal);
+    });
+
     it("should include X-Cal-Webhook-Version header with the webhook version", async () => {
       const webhook = {
         subscriberUrl: "https://example.com/webhook",

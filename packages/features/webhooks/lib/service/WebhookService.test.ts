@@ -1,12 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-
 import { WebhookTriggerEvents } from "@calcom/prisma/enums";
-
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebhookSubscriber } from "../dto/types";
-import { IWebhookRepository, WebhookVersion } from "../interface/IWebhookRepository";
-import { WebhookService } from "./WebhookService";
-import { ILogger, ITasker } from "../interface/infrastructure";
 import { WebhookPayload } from "../factory/types";
+import { IWebhookRepository, WebhookVersion } from "../interface/IWebhookRepository";
+import { ILogger, ITasker } from "../interface/infrastructure";
+import { WebhookService } from "./WebhookService";
 
 describe("WebhookService", () => {
   let mockFetch: ReturnType<typeof vi.fn>;
@@ -182,6 +180,34 @@ describe("WebhookService", () => {
       expect(taskName).toBe("sendWebhook");
       const parsedPayload = JSON.parse(taskPayload);
       expect(parsedPayload.webhook.version).toBe("2021-10-20");
+    });
+
+    it("does not log subscriber capability URLs", async () => {
+      const capabilityUrl = "https://crm.example.com/hook?token=capability-secret";
+      const service = new WebhookService(
+        mockRepository as unknown as IWebhookRepository,
+        mockTasker as unknown as ITasker,
+        mockLogger as unknown as ILogger
+      );
+      const subscriber: WebhookSubscriber = {
+        id: "webhook-1",
+        subscriberUrl: capabilityUrl,
+        payloadTemplate: null,
+        appId: null,
+        secret: "test-secret",
+        eventTriggers: [WebhookTriggerEvents.BOOKING_CREATED],
+        version: WebhookVersion.V_2021_10_20,
+      };
+      const payload = {
+        createdAt: new Date().toISOString(),
+        payload: { test: "data", triggerEvent: WebhookTriggerEvents.BOOKING_CREATED },
+      } as unknown as WebhookPayload;
+
+      await service.processWebhooks(WebhookTriggerEvents.BOOKING_CREATED, payload, [subscriber]);
+
+      const subLogger = mockLogger.getSubLogger.mock.results[0].value;
+      expect(JSON.stringify(subLogger.debug.mock.calls)).not.toContain("capability-secret");
+      expect(JSON.stringify(subLogger.error.mock.calls)).not.toContain("capability-secret");
     });
   });
 });

@@ -1,7 +1,6 @@
 /* eslint-disable playwright/missing-playwright-await */
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-
 import Credits from "./Credits";
 
 vi.mock("@calcom/lib/constants", async () => {
@@ -23,13 +22,18 @@ describe("Tests for Credits component", () => {
     const versionLinkElement = screen.getByRole("link", { name: /mockedVersion/i });
     expect(versionLinkElement).toBeInTheDocument();
     expect(versionLinkElement).toHaveAttribute("href", "https://go.cal.com/releases");
+
+    const sourceLinkElement = screen.getByRole("link", { name: /source code/i });
+    expect(sourceLinkElement).toHaveAttribute("href", "https://github.com/AIAgentLbs/cal-diy");
   });
 
   test("Should render credits section with correct text", () => {
     render(<Credits />);
 
     const currentYear = new Date().getFullYear();
-    const copyrightElement = screen.getByText(`© ${currentYear}`);
+    const copyrightElement = screen.getByText((_, element) => {
+      return element?.tagName === "SMALL" && element.textContent?.includes(`© ${currentYear}`) === true;
+    });
     expect(copyrightElement).toHaveTextContent(`${currentYear}`);
   });
 });

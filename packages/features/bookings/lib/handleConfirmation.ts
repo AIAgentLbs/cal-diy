@@ -588,11 +588,13 @@ export async function handleConfirmation(args: {
         new Date().toISOString(),
         sub,
         payload
-      ).catch((e) => {
-        tracingLogger.error(
-          `Error executing webhook for event: ${WebhookTriggerEvents.BOOKING_CREATED}, URL: ${sub.subscriberUrl}, bookingId: ${evt.bookingId}, bookingUid: ${evt.uid}, platformClientId: ${platformClientParams?.platformClientId}`,
-          safeStringify(e)
-        );
+      ).catch(() => {
+        tracingLogger.error(`Error executing webhook for event: ${WebhookTriggerEvents.BOOKING_CREATED}`, {
+          webhookId: sub.id,
+          bookingId: evt.bookingId,
+          bookingUid: evt.uid,
+          platformClientId: platformClientParams?.platformClientId,
+        });
       })
     );
 

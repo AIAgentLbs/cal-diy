@@ -4,7 +4,6 @@ import sendPayload from "@calcom/features/webhooks/lib/sendOrSchedulePayload";
 import type { EventPayloadType } from "@calcom/features/webhooks/lib/sendPayload";
 import getOrgIdFromMemberOrTeamId from "@calcom/lib/getOrgIdFromMemberOrTeamId";
 import logger from "@calcom/lib/logger";
-import { safeStringify } from "@calcom/lib/safeStringify";
 import { WebhookTriggerEvents } from "@calcom/prisma/enums";
 import type { CalendarEvent } from "@calcom/types/Calendar";
 
@@ -47,12 +46,7 @@ export const triggerRecordingReadyWebhook = async ({
   const eventTrigger: WebhookTriggerEvents = "RECORDING_READY";
   const webhooks = await getWebhooksByEventTrigger(eventTrigger, booking);
 
-  log.debug(
-    "Webhooks:",
-    safeStringify({
-      webhooks,
-    })
-  );
+  log.debug("Recording webhooks selected", { webhookCount: webhooks.length });
 
   const { assignmentReason: _emailAssignmentReason, ...evtWithoutAssignmentReason } = evt;
   const payload: EventPayloadType = {
@@ -61,11 +55,12 @@ export const triggerRecordingReadyWebhook = async ({
   };
 
   const promises = webhooks.map((webhook) =>
-    sendPayload(webhook.secret, eventTrigger, new Date().toISOString(), webhook, payload).catch((e) => {
-      log.error(
-        `Error executing webhook for event: ${eventTrigger}, URL: ${webhook.subscriberUrl}, bookingId: ${evt.bookingId}, bookingUid: ${evt.uid}`,
-        safeStringify(e)
-      );
+    sendPayload(webhook.secret, eventTrigger, new Date().toISOString(), webhook, payload).catch(() => {
+      log.error(`Error executing webhook for event: ${eventTrigger}`, {
+        webhookId: webhook.id,
+        bookingId: evt.bookingId,
+        bookingUid: evt.uid,
+      });
     })
   );
   await Promise.all(promises);
@@ -88,12 +83,7 @@ export const triggerTranscriptionGeneratedWebhook = async ({
     booking
   );
 
-  log.debug(
-    "Webhooks:",
-    safeStringify({
-      webhooks,
-    })
-  );
+  log.debug("Transcription webhooks selected", { webhookCount: webhooks.length });
 
   const { assignmentReason: _emailAssignmentReason2, ...evtWithoutAssignmentReason2 } = evt;
   const payload: EventPayloadType = {
@@ -108,10 +98,14 @@ export const triggerTranscriptionGeneratedWebhook = async ({
       new Date().toISOString(),
       webhook,
       payload
-    ).catch((e) => {
+    ).catch(() => {
       log.error(
-        `Error executing webhook for event: ${WebhookTriggerEvents.RECORDING_TRANSCRIPTION_GENERATED}, URL: ${webhook.subscriberUrl}, bookingId: ${evt.bookingId}, bookingUid: ${evt.uid}`,
-        safeStringify(e)
+        `Error executing webhook for event: ${WebhookTriggerEvents.RECORDING_TRANSCRIPTION_GENERATED}`,
+        {
+          webhookId: webhook.id,
+          bookingId: evt.bookingId,
+          bookingUid: evt.uid,
+        }
       );
     })
   );

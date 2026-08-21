@@ -342,6 +342,7 @@ const _sendPayload = async (
     },
     redirect: "manual",
     body,
+    signal: AbortSignal.timeout(10_000),
   });
 
   return {

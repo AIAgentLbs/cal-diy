@@ -1,10 +1,8 @@
 import { createHmac } from "node:crypto";
-
 import { WebhookTriggerEvents } from "@calcom/prisma/enums";
-
-import type { WebhookSubscriber, WebhookDeliveryResult } from "../dto/types";
+import type { WebhookDeliveryResult, WebhookSubscriber } from "../dto/types";
 import type { WebhookPayload } from "../factory/types";
-import type { ITasker, ILogger } from "../interface/infrastructure";
+import type { ILogger, ITasker } from "../interface/infrastructure";
 import type { IWebhookRepository, IWebhookService } from "../interface/services";
 
 export class WebhookService implements IWebhookService {
@@ -147,7 +145,6 @@ export class WebhookService implements IWebhookService {
         this.log.debug("Processing webhook", {
           trigger,
           webhookId: subscriber.id,
-          subscriberUrl: subscriber.subscriberUrl,
         });
 
         const result = await this.sendWebhook(trigger, payload, subscriber);
@@ -160,20 +157,18 @@ export class WebhookService implements IWebhookService {
           });
         } else {
           this.log.error(`Webhook failed`, {
-            error: result.message,
             trigger,
             webhookId: subscriber.id,
             statusCode: result.status,
           });
         }
-      } catch (err) {
+      } catch (error) {
         this.log.error("Error sending webhook", {
-          error: err instanceof Error ? err.message : String(err),
           trigger,
           webhookId: subscriber.id,
         });
         // Re-throw to ensure Promise.allSettled captures the failure
-        throw err;
+        throw error;
       }
     });
 
@@ -197,8 +192,6 @@ export class WebhookService implements IWebhookService {
         this.log.error(`Webhook processing failed for subscriber`, {
           trigger,
           webhookId: subscriber?.id,
-          subscriberUrl: subscriber?.subscriberUrl,
-          error: result.reason,
         });
       }
     });
@@ -243,12 +236,10 @@ export class WebhookService implements IWebhookService {
         }),
         { scheduledAt, referenceUid: `booking-${bookingData.id}-${trigger}` }
       );
-    } catch (error) {
+    } catch {
       this.log.error("Failed to schedule time-based webhook", {
         trigger,
         bookingId: bookingData.id,
-        subscriberUrl: subscriber.subscriberUrl,
-        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
