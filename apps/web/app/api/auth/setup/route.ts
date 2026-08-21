@@ -10,7 +10,7 @@ import { parseRequestData } from "app/api/parseRequestData";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import z from "zod";
-import { getBearerSecret, isSetupRequestAuthorized } from "./setup-auth";
+import { getBearerSecret, getSetupSecretFromBody, isSetupRequestAuthorized } from "./setup-auth";
 
 const querySchema = z.object({
   username: z
@@ -25,7 +25,8 @@ const querySchema = z.object({
 });
 
 async function handler(req: NextRequest) {
-  const providedSecret = getBearerSecret(req.headers.get("authorization"));
+  const body = await parseRequestData(req);
+  const providedSecret = getBearerSecret(req.headers.get("authorization")) ?? getSetupSecretFromBody(body);
   if (!isSetupRequestAuthorized(providedSecret, process.env.SETUP_SECRET)) {
     throw new HttpError({ statusCode: 401, message: "First-admin setup is not authorized." });
   }
@@ -34,8 +35,6 @@ async function handler(req: NextRequest) {
   if (userCount !== 0) {
     throw new HttpError({ statusCode: 400, message: "No setup needed." });
   }
-  const body = await parseRequestData(req);
-
   const parsedQuery = querySchema.safeParse(body);
   if (!parsedQuery.success) {
     throw new HttpError({ statusCode: 422, message: parsedQuery.error.message });

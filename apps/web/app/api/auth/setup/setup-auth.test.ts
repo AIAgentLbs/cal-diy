@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getBearerSecret, isSetupRequestAuthorized } from "./setup-auth";
+import { getBearerSecret, getSetupSecretFromBody, isSetupRequestAuthorized } from "./setup-auth";
 
 describe("first-admin setup authorization", () => {
   it("requires an exact non-empty setup secret", () => {
@@ -18,5 +18,12 @@ describe("first-admin setup authorization", () => {
     expect(getBearerSecret("Bearer server-secret")).toBe("server-secret");
     expect(getBearerSecret("server-secret")).toBeNull();
     expect(getBearerSecret(null)).toBeNull();
+  });
+
+  it("accepts a setup secret from a JSON body as a proxy-safe fallback", () => {
+    expect(getSetupSecretFromBody({ setup_secret: "server-secret" })).toBe("server-secret");
+    expect(getSetupSecretFromBody({ setup_secret: 123 })).toBeNull();
+    expect(getSetupSecretFromBody({})).toBeNull();
+    expect(getSetupSecretFromBody(null)).toBeNull();
   });
 });
