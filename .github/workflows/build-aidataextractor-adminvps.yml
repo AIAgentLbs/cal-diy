@@ -1,0 +1,60 @@
+name: Build AI Data Extractor calendar
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cx/aidataextractor-ru
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: aidataextractor-calendar-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Free disk space for the Cal.diy source build
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          df -h /
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/aiagentlbs/cal-diy:aidataextractor-${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_WEBAPP_URL=https://cal.aidataextractor.pro
+            NEXT_PUBLIC_LICENSE_CONSENT=agree
+            NEXT_PUBLIC_WEBSITE_TERMS_URL=https://aidataextractor.pro
+            NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL=https://aidataextractor.pro
+            NEXT_PUBLIC_APP_NAME=Календарь AI Data Extractor
+            NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS=ms@aidataextractor.pro
+            NEXT_PUBLIC_COMPANY_NAME=AI Data Extractor
+            NEXT_PUBLIC_DISABLE_SIGNUP=true
+            NEXT_PUBLIC_POWERED_BY_URL=https://github.com/AIAgentLbs/cal-diy
+            NEXT_PUBLIC_SOURCE_CODE_URL=https://github.com/AIAgentLbs/cal-diy/tree/cx/aidataextractor-ru
+            NEXT_PUBLIC_FORCE_LOCALE=ru
+            NEXT_PUBLIC_SINGLE_ORG_SLUG=
+            ORGANIZATIONS_ENABLED=false
+            CALCOM_TELEMETRY_DISABLED=1
+            DATABASE_URL=postgresql://cal:build-only@postgres:5432/cal
+          cache-from: type=gha,scope=aidataextractor-calendar
+          cache-to: type=gha,mode=max,scope=aidataextractor-calendar
