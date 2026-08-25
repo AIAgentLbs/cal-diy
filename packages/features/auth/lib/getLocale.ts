@@ -27,6 +27,7 @@ export const getLocale = async (
         headers: ReadonlyHeaders;
       }
 ): Promise<string> => {
+  if (process.env.NEXT_PUBLIC_FORCE_LOCALE) return process.env.NEXT_PUBLIC_FORCE_LOCALE;
   const token = await getToken({
     req: req as GetTokenParams["req"],
   });

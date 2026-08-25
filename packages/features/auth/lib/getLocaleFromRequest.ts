@@ -10,6 +10,7 @@ const { i18n } = require("@calcom/i18n/next-i18next.config");
 export async function getLocaleFromRequest(
   req: NextApiRequest | GetServerSidePropsContext["req"]
 ): Promise<string> {
+  if (process.env.NEXT_PUBLIC_FORCE_LOCALE) return process.env.NEXT_PUBLIC_FORCE_LOCALE;
   const session = await getServerSession({ req });
   if (session?.user?.locale) return session.user.locale;
   let preferredLocale: string | null | undefined;

@@ -58,7 +58,7 @@ async function handler(req: NextRequest) {
       role: "ADMIN",
       name: parsedQuery.data.full_name,
       emailVerified: new Date(),
-      locale: "en", // TODO: We should revisit this
+      locale: process.env.NEXT_PUBLIC_FORCE_LOCALE || "en",
       identityProvider: IdentityProvider.CAL,
       creationSource: CreationSource.WEBAPP,
     },

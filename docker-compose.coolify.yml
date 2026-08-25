@@ -1,6 +1,6 @@
 services:
   web:
-    image: aiagentlabs-cal-diy-source:local
+    image: ${CALDIY_IMAGE_NAME:-aiagentlabs-cal-diy-source:local}
     build:
       context: .
       dockerfile: Dockerfile
@@ -16,6 +16,7 @@ services:
         NEXT_PUBLIC_DISABLE_SIGNUP: ${NEXT_PUBLIC_DISABLE_SIGNUP:-true}
         NEXT_PUBLIC_POWERED_BY_URL: ${NEXT_PUBLIC_POWERED_BY_URL:-https://github.com/AIAgentLbs/cal-diy}
         NEXT_PUBLIC_SOURCE_CODE_URL: ${NEXT_PUBLIC_SOURCE_CODE_URL:-https://github.com/AIAgentLbs/cal-diy}
+        NEXT_PUBLIC_FORCE_LOCALE: ${NEXT_PUBLIC_FORCE_LOCALE:-}
         NEXT_PUBLIC_SINGLE_ORG_SLUG: ""
         ORGANIZATIONS_ENABLED: "false"
         CALCOM_TELEMETRY_DISABLED: "1"
@@ -40,6 +41,7 @@ services:
       NEXT_PUBLIC_DISABLE_SIGNUP: ${NEXT_PUBLIC_DISABLE_SIGNUP:-true}
       NEXT_PUBLIC_POWERED_BY_URL: ${NEXT_PUBLIC_POWERED_BY_URL:-https://github.com/AIAgentLbs/cal-diy}
       NEXT_PUBLIC_SOURCE_CODE_URL: ${NEXT_PUBLIC_SOURCE_CODE_URL:-https://github.com/AIAgentLbs/cal-diy}
+      NEXT_PUBLIC_FORCE_LOCALE: ${NEXT_PUBLIC_FORCE_LOCALE:-}
       EMAIL_FROM: ${EMAIL_FROM:-calendar@aiagentlbs.com}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-AI Agent Labs Calendar}
       EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST:-}
@@ -77,7 +79,7 @@ services:
     restart: unless-stopped
 
   cron:
-    image: aiagentlabs-cal-diy-source:local
+    image: ${CALDIY_IMAGE_NAME:-aiagentlabs-cal-diy-source:local}
     healthcheck:
       disable: true
     environment:
