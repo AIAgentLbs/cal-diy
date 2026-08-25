@@ -51,6 +51,8 @@ services:
 
   cron:
     image: ${CALDIY_IMAGE_NAME:?Set CALDIY_IMAGE_NAME}
+    healthcheck:
+      disable: true
     environment:
       CRON_API_KEY: ${CRON_API_KEY:?Set CRON_API_KEY}
       CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET}
