@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # CLAUDE.md — Workflow Translation
 
 ## Project Context

@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # CLAUDE.md — Cancellation Reason Requirement
 
 ## Project Context
