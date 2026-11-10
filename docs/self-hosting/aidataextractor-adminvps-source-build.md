@@ -21,7 +21,8 @@ The application runs as a Docker Swarm stack named `cal-aidataextractor` with is
 - `aidataextractor.ru` is managed in Nethouse/Registrant. The `cal A 157.22.230.99` record has TTL 300 and panel record ID `5298505`.
 - The `.ru` update was made only after snapshotting all 23 records. Verification found 24 records afterwards: all original rows were unchanged and the `cal` A record was the only addition.
 - Let's Encrypt certificate lineage `cal.aidataextractor.pro` covers both `cal.aidataextractor.pro` and `cal.aidataextractor.ru`; the initial certificate expires on 2026-11-23 and Certbot renewal is installed.
-- Active nginx config: `/opt/cal-aidataextractor/nginx/cal.aidataextractor.pro.active.conf`; verified SHA-256 `6b7e715d5a85cdbc0bec16bc821e532e5733e37adce0e21786792084591d1fd7`.
+- Active nginx config: `/opt/cal-aidataextractor/nginx/cal.aidataextractor.pro.active.conf`, bind-mounted into `deploy-stack_nginx`. The file is shared: the aidept vhost follows the `# aidept.pro (AIAgentLbs/aidept` marker. Install the calendar part only with `ops/adminvps/install-nginx-vhost.sh` (keeps the aidept tail, same inode, `nginx -t`, reload, auto-restore). SHA-256 after the 2026-11-10 install: `649f61d42175fe4c3924b689101e91628059e963caf1ecadc4b05a64735265b3`.
+- `https://cal.aidataextractor.pro/` returns 302 to the public demo event `/mihailorama/demo` (query kept); `/auth/login` stays reachable for the owner.
 
 ## Zone recovery evidence
 
@@ -46,3 +47,10 @@ The transient zone loss produced an `ENOTFOUND` alert for `mail.aidataextractor.
 - Configure SMTP in the private server environment and verify password reset, booking confirmation, cancellation, and recipient-inbox delivery. Public signup remains disabled.
 - Configure the real CRM webhook endpoint and signing requirements, then verify an actual booking event and CRM-side receipt.
 - Complete the first real event type and external calendar connection under the owner account.
+
+## 2026-11-10 branding and root redirect
+
+- Owner complaint: the bare domain opened an «AI Agent Labs» login page. Fixed in PR https://github.com/AIAgentLbs/cal-diy/pull/2.
+- Image `ghcr.io/aiagentlbs/cal-diy:aidataextractor-8fa03bab5cd48fab57df28c4e3fdcd21161022ca` (image ID `sha256:fe2dec8325c9beb8b82fdc70544fa884562b90dcdcf1c17f98396ec6bf552b13`), build run https://github.com/AIAgentLbs/cal-diy/actions/runs/42852040843.
+- Redeploy: backup `.env` and `docker-stack.yml` into `backups/`, copy `docker-stack.adminvps.yml` to `docker-stack.yml`, set `CALDIY_IMAGE_NAME` in `.env`, `set -a; . ./.env; set +a; docker stack deploy -c docker-stack.yml cal-aidataextractor`. All three services returned to `1/1`.
+- Verified live: `/` 302 to `/mihailorama/demo`; booking page and login show the AI Data Extractor logo; the booking form links terms to `https://aidataextractor.pro/oferta` and privacy to `https://aidataextractor.pro/privacy`; `/aiagentlabs-logo.svg` 404; the email logo `/emails/logo.png` is the AI Data Extractor mark. Slot selection reaches the confirmation form; no booking was submitted.
