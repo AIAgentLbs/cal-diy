@@ -98,16 +98,16 @@ export const PUBLIC_QUICK_AVAILABILITY_ROLLOUT =
 
 /** @deprecated use `WEBAPP_URL` */
 export const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_WEBAPP_URL || `https://${process.env.VERCEL_URL}`;
-export const LOGO = "/aiagentlabs-logo.svg";
-export const LOGO_DARK = "/aiagentlabs-logo.svg";
-export const LOGO_ICON = "/aiagentlabs-icon.svg";
+export const LOGO = "/aide-logo.svg";
+export const LOGO_DARK = "/aide-logo.svg";
+export const LOGO_ICON = "/aide-icon.svg";
 export const AVATAR_FALLBACK = "/avatar.svg";
-export const FAVICON_16 = "/aiagentlabs-icon.svg";
-export const FAVICON_32 = "/aiagentlabs-icon.svg";
-export const APPLE_TOUCH_ICON = "/aiagentlabs-icon.svg";
-export const MSTILE_ICON = "/aiagentlabs-icon.svg";
-export const ANDROID_CHROME_ICON_192 = "/aiagentlabs-icon.svg";
-export const ANDROID_CHROME_ICON_256 = "/aiagentlabs-icon.svg";
+export const FAVICON_16 = "/aide-icon.svg";
+export const FAVICON_32 = "/aide-icon.svg";
+export const APPLE_TOUCH_ICON = "/aide-icon.svg";
+export const MSTILE_ICON = "/aide-icon.svg";
+export const ANDROID_CHROME_ICON_192 = "/aide-icon.svg";
+export const ANDROID_CHROME_ICON_256 = "/aide-icon.svg";
 export const ROADMAP = "https://cal.com/roadmap";
 export const DESKTOP_APP_LINK = "https://cal.com/download";
 export const JOIN_COMMUNITY = "https://github.com/calcom/cal.com/discussions";

@@ -1,7 +1,7 @@
 {
-    "name": "Cal.com",
-    "short_name": "Cal.com",
-    "description": "Scheduling infrastructure for absolutely everyone.",
+    "name": "AI Data Extractor",
+    "short_name": "AI Data Extractor",
+    "description": "Календарь AI Data Extractor",
     "icons": [
         {
             "src": "/api/logo?type=android-chrome-192",

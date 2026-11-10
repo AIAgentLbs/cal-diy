@@ -15,8 +15,8 @@ services:
       NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Календарь AI Data Extractor}
       NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS: ${NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS:-ms@aidataextractor.pro}
       NEXT_PUBLIC_COMPANY_NAME: ${NEXT_PUBLIC_COMPANY_NAME:-AI Data Extractor}
-      NEXT_PUBLIC_WEBSITE_TERMS_URL: ${NEXT_PUBLIC_WEBSITE_TERMS_URL:-https://aidataextractor.pro}
-      NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL: ${NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL:-https://aidataextractor.pro}
+      NEXT_PUBLIC_WEBSITE_TERMS_URL: ${NEXT_PUBLIC_WEBSITE_TERMS_URL:-https://aidataextractor.pro/oferta}
+      NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL: ${NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL:-https://aidataextractor.pro/privacy}
       NEXT_PUBLIC_DISABLE_SIGNUP: "true"
       NEXT_PUBLIC_POWERED_BY_URL: https://github.com/AIAgentLbs/cal-diy
       NEXT_PUBLIC_SOURCE_CODE_URL: https://github.com/AIAgentLbs/cal-diy
