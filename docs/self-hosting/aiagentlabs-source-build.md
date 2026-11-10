@@ -1,6 +1,7 @@
 # cal.aiagentlbs.com source-build deployment
 
-Status: deployed and infrastructure-verified on 2026-08-21; SMTP and owner onboarding remain pending
+Status: deployed and infrastructure-verified on 2026-08-21; public booking verified on 2026-11-10;
+SMTP relay and Google Calendar wait on owner-side Google Workspace steps
 
 ## Goal
 
@@ -128,12 +129,36 @@ the setup secret into operator handoff records after login has been verified.
 - [x] Verify migrations, exact deployed commit, HTTPS, Russian UI/account locale,
   protected bootstrap, credentials login, cron endpoints, and persistence across redeploys.
 - [x] Verify GitHub webhook autodeploy from follow-up commits.
-- [ ] Complete owner onboarding and admin 2FA, then create the first real event type
-  and verify its public booking page and Corresponding Source link.
-- [ ] Configure SMTP and verify invite, password reset, booking, cancellation,
-  and recipient-inbox delivery while keeping public signup disabled until green.
+- [x] Owner onboarding (`completedOnboarding`) and the first real event type:
+  `/aiagentlabs/30min` is titled "Orgfold: talk about setup"; a visitor booking and
+  its cancellation succeeded over the public domain on 2026-11-10.
+- [ ] Admin 2FA for `mihailorama@gmail.com` (owner action in Settings -> Security).
+- [ ] SMTP: Coolify now holds `EMAIL_SERVER_HOST=smtp-relay.gmail.com`, port 587,
+  no SMTP user/password, `EMAIL_FROM=calendar@aiagentlbs.com`. The Google Workspace
+  SMTP relay still answers `550 5.7.0` until an Admin console rule allows `5.78.46.146`
+  (Apps -> Google Workspace -> Gmail -> Routing -> SMTP relay service: senders
+  "Only addresses in my domains", "Only accept mail from the specified IP addresses",
+  require TLS). Then verify invite, password reset, booking, cancellation, and
+  recipient-inbox delivery while keeping public signup disabled.
+- [ ] Google Calendar: needs a Web OAuth client in an ingecta.com Cloud project
+  (Internal consent screen, Calendar API enabled, redirect URI
+  `https://cal.aiagentlbs.com/api/integrations/googlecalendar/callback`). Its
+  `client_id`, `client_secret` and `redirect_uris` go into the `google-calendar`
+  row of the `App` table (the same store as Settings -> Admin -> Apps, no rebuild);
+  then the owner installs the app at `/apps/google-calendar` and gives consent.
+  Until then the 30min type has no conferencing location (Cal Video is disabled).
 - [ ] Configure the production CRM webhook URL/signing secret and verify a real
   booking event, retry behavior, and CRM-side receipt.
+
+## Runtime-env change without a rebuild
+
+A Coolify restart or redeploy of this compose application rebuilds the image
+(20-25 GB of temporary disk). For a runtime-only variable, set it in Coolify first
+so later deploys keep it, then apply the same value to Coolify's generated
+`/data/coolify/applications/<uuid>/docker-compose.yaml` (back it up first) and run
+`docker compose -p <uuid> --project-directory <dir> -f <dir>/docker-compose.yaml up -d --no-build --no-deps web`.
+Used on 2026-11-10 for `EMAIL_SERVER_HOST`; web returned healthy and cron kept
+getting HTTP 200. Doc-only commits carry `[skip cd]` so the GitHub webhook skips the build.
 
 ## Update procedure
 
