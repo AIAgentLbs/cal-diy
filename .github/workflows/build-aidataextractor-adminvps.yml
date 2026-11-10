@@ -43,8 +43,8 @@ jobs:
           build-args: |
             NEXT_PUBLIC_WEBAPP_URL=https://cal.aidataextractor.pro
             NEXT_PUBLIC_LICENSE_CONSENT=agree
-            NEXT_PUBLIC_WEBSITE_TERMS_URL=https://aidataextractor.pro
-            NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL=https://aidataextractor.pro
+            NEXT_PUBLIC_WEBSITE_TERMS_URL=https://aidataextractor.pro/oferta
+            NEXT_PUBLIC_WEBSITE_PRIVACY_POLICY_URL=https://aidataextractor.pro/privacy
             NEXT_PUBLIC_APP_NAME=Календарь AI Data Extractor
             NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS=ms@aidataextractor.pro
             NEXT_PUBLIC_COMPANY_NAME=AI Data Extractor
