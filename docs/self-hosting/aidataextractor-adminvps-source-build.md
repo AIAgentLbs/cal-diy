@@ -63,3 +63,10 @@ few kilobytes: short messages pass, a booking e-mail with its `.ics` attachment 
 `.env` therefore sets `EMAIL_SERVER_PORT=587` (backup of the previous `.env` in `backups/`).
 The `demo` event uses Mike's Zoom personal room link as its location (Vaultwarden item
 "Zoom — Mike Sadofyev (Workplace Pro, mihailorama@gmail.com)"); Cal Video has no Daily key here.
+
+## Neutral host identity (2026-11-11)
+
+The public organizer is the product, not a person: user 1 is `username=aide`,
+`name=AI Data Extractor`, `email=ms@aidataextractor.pro` (forwarded to the owner by Forward Email,
+`@` MX + `forward-email=` TXT at Namecheap). Public link: `https://cal.aidataextractor.pro/aide/demo`;
+`/` and the old `/mihailorama/*` paths redirect there (nginx vhost above).
