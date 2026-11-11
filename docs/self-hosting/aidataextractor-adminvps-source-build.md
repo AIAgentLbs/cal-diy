@@ -54,3 +54,12 @@ The transient zone loss produced an `ENOTFOUND` alert for `mail.aidataextractor.
 - Image `ghcr.io/aiagentlbs/cal-diy:aidataextractor-8fa03bab5cd48fab57df28c4e3fdcd21161022ca` (image ID `sha256:fe2dec8325c9beb8b82fdc70544fa884562b90dcdcf1c17f98396ec6bf552b13`), build run https://github.com/AIAgentLbs/cal-diy/actions/runs/42852040843.
 - Redeploy: backup `.env` and `docker-stack.yml` into `backups/`, copy `docker-stack.adminvps.yml` to `docker-stack.yml`, set `CALDIY_IMAGE_NAME` in `.env`, `set -a; . ./.env; set +a; docker stack deploy -c docker-stack.yml cal-aidataextractor`. All three services returned to `1/1`.
 - Verified live: `/` 302 to `/mihailorama/demo`; booking page and login show the AI Data Extractor logo; the booking form links terms to `https://aidataextractor.pro/oferta` and privacy to `https://aidataextractor.pro/privacy`; `/aiagentlabs-logo.svg` 404; the email logo `/emails/logo.png` is the AI Data Extractor mark. Slot selection reaches the confirmation form; no booking was submitted.
+
+## Mail: use port 587 on AdminVPS (2026-11-11)
+
+AdminVPS drops SMTP/TLS sessions to `smtp.resend.com` on ports 465, 2465 and 2587 after the first
+few kilobytes: short messages pass, a booking e-mail with its `.ics` attachment stalls and
+`/api/book/event` hangs without sending anything. Port 587 (STARTTLS) passes 60 KB messages.
+`.env` therefore sets `EMAIL_SERVER_PORT=587` (backup of the previous `.env` in `backups/`).
+The `demo` event uses Mike's Zoom personal room link as its location (Vaultwarden item
+"Zoom — Mike Sadofyev (Workplace Pro, mihailorama@gmail.com)"); Cal Video has no Daily key here.
