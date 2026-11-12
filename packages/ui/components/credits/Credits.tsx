@@ -47,7 +47,7 @@ export default function Credits() {
       )}
       {" · "}
       <Link href={SOURCE_CODE_URL} target="_blank" className="font-semibold hover:underline">
-        Исходный код / Source code
+        Исходный код календаря
       </Link>
     </small>
   );
