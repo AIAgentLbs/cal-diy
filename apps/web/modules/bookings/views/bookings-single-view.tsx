@@ -47,12 +47,11 @@ import { AssignmentReasonEnum, BookingStatus, SchedulingType } from "@calcom/pri
 import assignmentReasonBadgeTitleMap from "@calcom/web/lib/booking/assignmentReasonBadgeTitleMap";
 import { bookingMetadataSchema } from "@calcom/prisma/zod-utils";
 import { trpc } from "@calcom/trpc/react";
-import { Alert } from "@calcom/ui/components/alert";
 import { Avatar } from "@calcom/ui/components/avatar";
 import { Badge } from "@calcom/ui/components/badge";
 import { Button } from "@calcom/ui/components/button";
 import { EmptyScreen } from "@calcom/ui/components/empty-screen";
-import { EmailInput, TextArea } from "@calcom/ui/components/form";
+import { TextArea } from "@calcom/ui/components/form";
 import { Icon } from "@calcom/ui/components/icon";
 import {
   CalendarIcon,
@@ -166,8 +165,6 @@ export default function Success(props: PageProps) {
     props.paymentStatus && !props.paymentStatus.success && !isPaymentSucceededFromRedirect;
 
   const attendees = bookingInfo?.attendees;
-
-  const isGmail = !!attendees.find((attendee) => attendee?.email?.includes("gmail.com"));
 
   const [is24h, setIs24h] = useState(
     props?.userTimeFormat ? props.userTimeFormat === 24 : isBrowserLocale24h()
@@ -645,7 +642,7 @@ export default function Success(props: PageProps) {
                                     <span data-testid="booking-host-name" className="mr-2">
                                       {bookingInfo.user.name}
                                     </span>
-                                    <Badge variant="blue">{t("Host")}</Badge>
+                                    <Badge variant="blue">{t("host")}</Badge>
                                   </div>
                                   {!bookingInfo.eventType?.hideOrganizerEmail && (
                                     <p className="text-default" data-testid="booking-host-email">
@@ -1041,40 +1038,6 @@ export default function Success(props: PageProps) {
                       </>
                     )}
 
-                    {session === null && !(userIsOwner || props.hideBranding) && (
-                      <>
-                        <hr className="border-subtle mt-8" />
-                        <div className="text-default pt-8 text-center text-xs">
-                          <a href="https://cal.com/signup">
-                            {t("create_booking_link_with_calcom", { appName: APP_NAME })}
-                          </a>
-
-                          <form
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              const target = e.target as typeof e.target & {
-                                email: { value: string };
-                              };
-                              router.push(`https://cal.com/signup?email=${target.email.value}`);
-                            }}
-                            className="mt-4 flex">
-                            <EmailInput
-                              name="email"
-                              id="email"
-                              defaultValue={email}
-                              className="mr- focus:border-brand-default border-default text-default mt-0 block w-full rounded-none rounded-l-md shadow-sm focus:ring-black sm:text-sm"
-                              placeholder="rick.astley@cal.com"
-                            />
-                            <Button
-                              type="submit"
-                              className="min-w-max rounded-none rounded-r-md"
-                              color="primary">
-                              {t("try_for_free")}
-                            </Button>
-                          </form>
-                        </div>
-                      </>
-                    )}
                   </>
                 )}
                 {isFeedbackMode &&
@@ -1140,27 +1103,6 @@ export default function Success(props: PageProps) {
                     </>
                   ))}
               </div>
-              {isGmail && !isFeedbackMode && (
-                <Alert
-                  className="main -mb-20 mt-4 inline-block ltr:text-left rtl:text-right sm:-mt-4 sm:mb-4 sm:w-full sm:max-w-xl sm:align-middle"
-                  severity="warning"
-                  message={
-                    <div>
-                      <p className="font-semibold">{t("google_new_spam_policy")}</p>
-                      <span className="underline">
-                        <a
-                          target="_blank"
-                          href="https://cal.com/blog/google-s-new-spam-policy-may-be-affecting-your-invitations"
-                          rel="noreferrer">
-                          {t("resolve")}
-                        </a>
-                      </span>
-                    </div>
-                  }
-                  CustomIcon="circle-alert"
-                  customIconColor="text-attention dark:text-orange-200"
-                />
-              )}
             </div>
           </div>
         </div>

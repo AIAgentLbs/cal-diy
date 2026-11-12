@@ -415,7 +415,8 @@ const BookerComponent = ({
                     isMobile={isMobile}
                     nextSlots={nextSlots}
                     renderOverlay={() => {
-                      if (isEmbed) return null;
+                      // AIDE: visitors have no calendar account here; only the signed-in owner sees the overlay.
+                      if (isEmbed || !hasSession) return null;
                       return (
                         <OverlayCalendar
                           isOverlayCalendarEnabled={isOverlayCalendarEnabled}
@@ -625,7 +626,7 @@ const BookerComponent = ({
               href={SOURCE_CODE_URL}
               target="_blank"
               rel="noreferrer">
-              Исходный код / Source code
+              Исходный код календаря
             </a>
           </m.span>
         )}

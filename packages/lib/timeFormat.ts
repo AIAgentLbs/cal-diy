@@ -41,8 +41,9 @@ export const isBrowserLocale24h = () => {
   } else if (localStorageTimeFormat === false) {
     return false;
   }
-  // Intl.DateTimeFormat with value=undefined uses local browser settings.
-  if (!!new Intl.DateTimeFormat(undefined, { hour: "numeric" }).format(0).match(/M/i)) {
+  // A forced locale (AIDE: ru) decides the clock; otherwise the browser's locale does.
+  const locale = process.env.NEXT_PUBLIC_FORCE_LOCALE || undefined;
+  if (!!new Intl.DateTimeFormat(locale, { hour: "numeric" }).format(0).match(/M/i)) {
     setIs24hClockInLocalStorage(false);
     return false;
   } else {
